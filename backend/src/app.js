@@ -40,6 +40,9 @@ app.get('/', (req, res) => {
 });
 
 /* ---------- Routes ---------- */
+const authRoutes = require('./modules/auth/routes/auth.routes');
+
+app.use('/api/v1/auth', authRoutes);
 
 /* ------- 404 Middleware -------- */
 app.use((req, res) => {

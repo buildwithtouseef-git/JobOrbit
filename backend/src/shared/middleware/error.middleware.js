@@ -3,13 +3,13 @@ const RESPONSE_MESSAGES = require('../constants/responseMessages');
 
 const errorMiddlware = (err, req, res, next) => {
     let statusCode = err.statusCode || STATUS_CODES.INTERNAL_SERVER_ERROR;
-    let message = err.message || RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR;
+    let message = err.message || RESPONSE_MESSAGES.COMMON.INTERNAL_SERVER_ERROR;
     let errors = err.errors || [];
 
     // Mongoose Validation Error
     if (err.name === 'ValidationError') {
         statusCode = STATUS_CODES.BAD_REQUEST;
-        message = RESPONSE_MESSAGES.VALIDATION_FAILED;
+        message = RESPONSE_MESSAGES.COMMON.VALIDATION_FAILED;
 
         errors = Object.values(err.errors).map((error) => ({
             field: error.path,
@@ -31,7 +31,7 @@ const errorMiddlware = (err, req, res, next) => {
     // Mongoose Invalid ObjectId
     if (err.name === 'CastError') {
         statusCode = STATUS_CODES.BAD_REQUEST;
-        message = RESPONSE_MESSAGES.INVALID_RESOURCE_ID;
+        message = RESPONSE_MESSAGES.COMMON.INVALID_RESOURCE_ID;
         errors = [
             {
                 field: err.path,
@@ -42,11 +42,11 @@ const errorMiddlware = (err, req, res, next) => {
     // JWT Errors
     if (err.name === 'JsonWebTokenError') {
         statusCode = STATUS_CODES.UNAUTHORIZED;
-        message = RESPONSE_MESSAGES.INVALID_TOKEN;
+        message = RESPONSE_MESSAGES.AUTH.INVALID_TOKEN;
     }
     if (err.name === 'TokenExpiredError') {
         statusCode = STATUS_CODES.UNAUTHORIZED;
-        message = RESPONSE_MESSAGES.TOKEN_EXPIRED;
+        message = RESPONSE_MESSAGES.AUTH.TOKEN_EXPIRED;
     }
     return res.status(statusCode).json({
         success: false,
