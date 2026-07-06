@@ -7,7 +7,8 @@ export const AuthRoutes = () => {
       <Route path="/" element={<ForgotPasswordPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/verify-code" element={<VerifyCodePage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      {/* Yahan :token parameter add kiya hai taake URL se token mile */}
+      <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
     </Routes>
   );
 };
