@@ -158,6 +158,10 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     );
 });
 
+function abc () {
+
+}
+
 module.exports = {
     signup,
     login,
