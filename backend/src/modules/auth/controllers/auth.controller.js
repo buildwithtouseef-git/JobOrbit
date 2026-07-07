@@ -135,6 +135,29 @@ const verifyEmail = asyncHandler(async (req, res) => {
     );
 });
 
+const resendVerification = asyncHandler(async (req, res) => {
+    const { email } = req.validatedData;
+    const result = await authService.resendVerification(email);
+
+    return ApiResponse.success(
+        res,
+        STATUS_CODES.ok,
+        result.message,
+        null
+    );
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return ApiResponse.success(
+        res,
+        STATUS_CODES.ok,
+        'User profile retrieved successfully.',
+        {
+            user: req.user,
+        }
+    );
+});
+
 module.exports = {
     signup,
     login,
@@ -144,4 +167,6 @@ module.exports = {
     refreshToken,
     logout,
     verifyEmail,
+    resendVerification,
+    getCurrentUser,
 };

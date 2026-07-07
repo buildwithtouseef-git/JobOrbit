@@ -423,6 +423,32 @@ class AuthService {
             message: RESPONSE_MESSAGES.AUTH.EMAIL_VERIFIED,
         };
     }
+
+    async resendVerification(email) {
+        const user = await authRepository.findUserByEmail(email);
+
+        if (!user) {
+            return {
+                message: RESPONSE_MESSAGES.AUTH.PASSWORD_RESET_EMAIL_SENT,
+            };
+        }
+
+        if (user.isEmailVerified) {
+            return {
+                message: RESPONSE_MESSAGES.AUTH.EMAIL_ALREADY_VERIFIED,
+            };
+        }
+
+        try {
+            await this._sendVerificationEmail(user);
+        } catch (error) {
+            logger.error(`Failed to resend verification email to ${user.email}: ${error.message}`);
+        }
+
+        return {
+            message: RESPONSE_MESSAGES.AUTH.PASSWORD_RESET_EMAIL_SENT,
+        };
+    }
 }
 
 module.exports = new AuthService();

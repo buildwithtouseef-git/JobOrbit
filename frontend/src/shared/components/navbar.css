@@ -1,0 +1,139 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--navbar-height);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  background: rgba(10, 17, 40, 0.55);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.navbar-inner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.navbar .orbit-mark {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: inline-block;
+}
+.navbar .orbit-mark .core {
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--neon-soft), var(--neon-deep));
+  box-shadow: 0 0 14px 2px rgba(0, 212, 255, 0.7);
+}
+.navbar .orbit-mark .ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.4px solid rgba(0, 212, 255, 0.55);
+}
+.navbar .orbit-mark .sat {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--neon-soft);
+  box-shadow: 0 0 8px 2px var(--neon);
+  top: -1px;
+  left: 50%;
+  margin-left: -2px;
+  animation: orbit-spin 5s linear infinite;
+  transform-origin: 2px 16px;
+}
+@keyframes orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.brand-name {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.2px;
+  color: #fff;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-btn {
+  padding: 9px 20px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.nav-btn-ghost {
+  color: #cbd8f0;
+  border: 1.4px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+}
+.nav-btn-ghost:hover {
+  border-color: var(--neon);
+  color: #fff;
+}
+.nav-btn-ghost.active {
+  border-color: var(--neon);
+  color: #fff;
+  background: rgba(0, 212, 255, 0.1);
+  box-shadow: 0 0 16px -4px rgba(0, 212, 255, 0.6);
+}
+
+.nav-btn-solid {
+  color: #04121c;
+  border: 1.4px solid transparent;
+  background: linear-gradient(135deg, var(--neon-soft), var(--neon), var(--neon-deep));
+  box-shadow: 0 8px 20px -8px rgba(0, 212, 255, 0.6);
+}
+.nav-btn-solid:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.nav-btn-solid.active {
+  filter: brightness(1.1);
+  box-shadow: 0 0 18px -2px rgba(0, 212, 255, 0.8);
+}
+
+@media (max-width: 480px) {
+  .navbar-inner {
+    padding: 0 16px;
+  }
+  .brand-name {
+    font-size: 16px;
+  }
+  .nav-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+}

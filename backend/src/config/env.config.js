@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const env = {
-    NODE_ENV: process.env.NODE_ENV,
+    NODE_ENV: process.env.NODE_ENV === 'production' ? 'production' : 'development',
     PORT: process.env.PORT,
     CLIENT_URL: process.env.CLIENT_URL,
     MONGODB_URL: process.env.MONGODB_URL,

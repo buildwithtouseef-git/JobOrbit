@@ -1,0 +1,688 @@
+/* =========================================================
+   AUTH LAYOUT — recreates the original JobOrbit auth design
+   ========================================================= */
+
+.auth-page {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============ SHELL ============ */
+.shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1040px;
+  height: 660px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
+  border: 1px solid var(--line);
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 0 120px -40px rgba(0, 212, 255, 0.25);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  overflow: hidden;
+  display: flex;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* ============ SIDE PANELS ============ */
+.side {
+  position: relative;
+  flex: 1 1 50%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  transition: flex-grow 0.7s var(--ease), flex-basis 0.7s var(--ease);
+  overflow: hidden;
+}
+
+.stage[data-active="login"] .side.login {
+  flex-grow: 1.58;
+}
+.stage[data-active="login"] .side.signup {
+  flex-grow: 0.72;
+}
+.stage[data-active="signup"] .side.login {
+  flex-grow: 0.72;
+}
+.stage[data-active="signup"] .side.signup {
+  flex-grow: 1.58;
+}
+
+/* seam glow line between panels */
+.seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  z-index: 5;
+  left: 68.7%;
+  background: linear-gradient(to bottom, transparent, var(--neon), transparent);
+  box-shadow: 0 0 24px 4px rgba(0, 212, 255, 0.55);
+  transition: left 0.7s var(--ease);
+  pointer-events: none;
+}
+.stage[data-active="signup"] .seam {
+  left: 31.3%;
+}
+
+/* comet particle traveling the seam on toggle */
+.comet {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--neon-soft);
+  box-shadow: 0 0 14px 4px var(--neon), 0 0 28px 10px rgba(0, 212, 255, 0.4);
+  top: 50%;
+  left: 68.7%;
+  margin-left: -3px;
+  opacity: 0;
+  z-index: 6;
+  pointer-events: none;
+  transition: left 0.7s var(--ease);
+}
+.stage[data-active="signup"] .comet {
+  left: 31.3%;
+}
+.comet.fire {
+  animation: comet-travel 0.7s var(--ease);
+}
+@keyframes comet-travel {
+  0% {
+    opacity: 1;
+    transform: translateY(-260px);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(260px);
+  }
+}
+
+/* ---- LOGIN panel base (white workspace by default) ---- */
+.side.login {
+  background: var(--white-panel);
+  color: var(--ink);
+}
+.side.signup {
+  background: radial-gradient(500px 400px at 30% 20%, rgba(0, 212, 255, 0.16), transparent 60%),
+    linear-gradient(160deg, var(--navy-3), var(--navy-1));
+  color: #eaf3ff;
+}
+
+.side.login.is-inactive {
+  background: radial-gradient(480px 380px at 70% 80%, rgba(0, 212, 255, 0.14), transparent 60%),
+    linear-gradient(200deg, var(--navy-2), var(--navy-1));
+  color: #eaf3ff;
+}
+.side.signup.is-active {
+  background: var(--white-panel);
+  color: var(--ink);
+}
+
+/* ============ INNER CONTENT SWAP ============ */
+.full-content,
+.teaser-content {
+  position: absolute;
+  inset: 0;
+  padding: 44px 46px;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.45s ease, transform 0.55s var(--ease);
+}
+
+.teaser-content {
+  align-items: flex-start;
+  justify-content: center;
+  opacity: 1;
+}
+.full-content {
+  opacity: 1;
+}
+.side.is-inactive .full-content {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  pointer-events: none;
+}
+.side:not(.is-inactive) .teaser-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============ BRAND ============ */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.orbit-mark {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: inline-block;
+}
+.orbit-mark .core {
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--neon-soft), var(--neon-deep));
+  box-shadow: 0 0 16px 2px rgba(0, 212, 255, 0.7);
+}
+.orbit-mark .ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.4px solid rgba(0, 212, 255, 0.55);
+}
+.orbit-mark .sat {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--neon-soft);
+  box-shadow: 0 0 8px 2px var(--neon);
+  top: -2px;
+  left: 50%;
+  margin-left: -2.5px;
+  animation: orbit-spin 5s linear infinite;
+  transform-origin: 2.5px 21px;
+}
+@keyframes orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.brand-name {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.2px;
+  color: var(--neon-deep);
+}
+.side.is-inactive .brand-name {
+  color: #ffffff;
+}
+.side.signup.is-active .brand-name {
+  color: var(--neon-deep);
+}
+.side.signup.is-inactive .brand-name {
+  color: #ffffff;
+}
+
+h1.heading {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 27px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  letter-spacing: -0.2px;
+}
+.subtitle {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin-bottom: 26px;
+}
+/* NOTE: full-content (and therefore .subtitle) is only ever visible
+   while its side is active, i.e. on the white panel — so it must
+   always use the dark, readable color above. No dark-theme override
+   here on purpose (that was the cause of the low-contrast text bug). */
+
+/* ============ FORM ============ */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  position: relative;
+}
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--ink-soft);
+  letter-spacing: 0.2px;
+}
+
+.field-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.field-input .icon-lead {
+  position: absolute;
+  left: 14px;
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  pointer-events: none;
+  display: inline-flex;
+}
+.field-input .icon-lead svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Form fields only ever render on the white panel (whichever side is
+   currently active), so they always use this dark-on-light theme —
+   regardless of whether the side is .login or .register. Previously
+   a `.side.register` override forced near-white text on a near-white
+   background here, which made typed text unreadable. */
+.field-input input {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  border-radius: var(--radius-sm);
+  border: 1.4px solid rgba(15, 23, 42, 0.14);
+  background: #ffffff;
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.field-input input::placeholder {
+  color: #9aa7bd;
+}
+.field-input input:focus {
+  border-color: var(--neon);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.18), 0 0 18px -2px rgba(0, 212, 255, 0.5);
+  background: #ffffff;
+}
+
+.toggle-eye {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  padding: 2px;
+}
+.toggle-eye:hover {
+  color: var(--neon-deep);
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  margin-top: 2px;
+}
+.checkbox-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-soft);
+}
+.checkbox-line input {
+  accent-color: var(--neon-deep);
+  width: 14px;
+  height: 14px;
+}
+
+a.link,
+button.link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--neon-deep);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: "Inter", sans-serif;
+}
+a.link:hover,
+button.link:hover {
+  text-decoration: underline;
+}
+
+.form-error {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ff6b6b;
+  margin-top: -4px;
+}
+
+/* ============ BUTTONS ============ */
+.btn-primary {
+  margin-top: 6px;
+  padding: 13px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  color: #04121c;
+  background: linear-gradient(135deg, var(--neon-soft), var(--neon), var(--neon-deep));
+  box-shadow: 0 8px 24px -6px rgba(0, 212, 255, 0.55);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 12px 30px -6px rgba(0, 212, 255, 0.75);
+  filter: brightness(1.06);
+}
+.btn-primary:active {
+  transform: translateY(0) scale(0.99);
+}
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 14px;
+  font-size: 11.5px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-family: "JetBrains Mono", monospace;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(15, 23, 42, 0.12);
+}
+
+.social-row {
+  display: flex;
+  gap: 10px;
+}
+.btn-social {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.4px solid rgba(15, 23, 42, 0.14);
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.btn-social:hover {
+  border-color: var(--neon);
+  box-shadow: 0 0 14px -2px rgba(0, 212, 255, 0.5);
+  transform: translateY(-1px);
+}
+.btn-social svg {
+  width: 15px;
+  height: 15px;
+}
+
+.switch-line {
+  margin-top: auto;
+  padding-top: 16px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.badges {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  color: #4b7a63;
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+.badge svg {
+  width: 11px;
+  height: 11px;
+}
+
+/* ============ TEASER (inactive side compact CTA) ============ */
+.teaser-content h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #fff;
+}
+.teaser-content p {
+  font-size: 13.5px;
+  color: #a9bbdc;
+  line-height: 1.55;
+  margin-bottom: 22px;
+  max-width: 260px;
+}
+.btn-ghost {
+  display: inline-block;
+  padding: 11px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1.4px solid var(--neon);
+  color: var(--neon-soft);
+  background: rgba(0, 212, 255, 0.06);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  transition: box-shadow 0.25s ease, background 0.25s ease, transform 0.2s ease;
+}
+.btn-ghost:hover {
+  background: rgba(0, 212, 255, 0.16);
+  box-shadow: 0 0 22px -2px rgba(0, 212, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+/* ============ RESET PASSWORD OVERLAY ============ */
+.reset-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 8, 20, 0.55);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.reset-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.reset-card {
+  width: 86%;
+  max-width: 340px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 26px 24px;
+  box-shadow: 0 0 40px -6px rgba(0, 212, 255, 0.4);
+  transform: translateY(14px) scale(0.97);
+  transition: transform 0.35s var(--ease);
+}
+.reset-overlay.show .reset-card {
+  transform: translateY(0) scale(1);
+}
+.reset-card h3 {
+  font-family: "Space Grotesk", sans-serif;
+  color: #fff;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.reset-card p {
+  font-size: 12.5px;
+  color: #a9bbdc;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.reset-card .field-input input {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.reset-card-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.btn-secondary {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: transparent;
+  border: 1.4px solid rgba(255, 255, 255, 0.18);
+  color: #cbd8f0;
+  font-weight: 600;
+  font-size: 13px;
+}
+.btn-secondary:hover {
+  border-color: var(--neon);
+  color: #fff;
+}
+.reset-card .btn-primary {
+  flex: 1.4;
+  margin-top: 0;
+}
+.reset-success {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  color: #5eead4;
+  font-size: 12.5px;
+  margin-top: 10px;
+}
+.reset-success.show {
+  display: flex;
+}
+
+/* ============ MOBILE TAB BAR ============ */
+.mobile-tabs {
+  display: none;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 860px) {
+  .shell {
+    height: auto;
+    max-width: 440px;
+    flex-direction: column;
+  }
+  .stage {
+    flex-direction: column;
+  }
+  .side {
+    flex: none !important;
+  }
+  .seam,
+  .comet {
+    display: none;
+  }
+  .mobile-tabs {
+    display: flex;
+    padding: 16px 20px 0;
+    gap: 8px;
+    position: relative;
+    z-index: 3;
+    background: var(--navy-1);
+  }
+  .mobile-tabs a {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 999px;
+    border: 1.4px solid rgba(255, 255, 255, 0.14);
+    background: transparent;
+    color: #a9bbdc;
+    font-weight: 700;
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  .mobile-tabs a.active {
+    background: var(--neon);
+    color: #04121c;
+    border-color: var(--neon);
+    box-shadow: 0 0 16px -2px rgba(0, 212, 255, 0.6);
+  }
+
+  .side.login,
+  .side.signup {
+    height: auto;
+    min-height: 0;
+  }
+  .side.signup {
+    display: none;
+  }
+  .side.login {
+    display: flex;
+  }
+  .stage[data-mobile-active="signup"] .side.login {
+    display: none;
+  }
+  .stage[data-mobile-active="signup"] .side.signup {
+    display: flex;
+  }
+
+  .full-content,
+  .teaser-content {
+    position: relative;
+    inset: auto;
+    padding: 26px 24px 30px;
+  }
+  .teaser-content {
+    display: none !important;
+  }
+  .side.is-inactive .full-content {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  .side .full-content {
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+  .comet,
+  .orbit-mark .sat {
+    animation: none;
+  }
+}

@@ -15,6 +15,7 @@ class AuthRepository {
         const {
             includePassword = false,
             includeRefreshToken = false,
+            lean = false,
         } = options;
 
         const query = User.findOne({ email });
@@ -25,6 +26,18 @@ class AuthRepository {
 
         if (includeRefreshToken) {
             query.select("+refreshToken");
+        }
+
+        if (!includePassword) {
+            query.select("-password");
+        }
+
+        if (!includeRefreshToken) {
+            query.select("-refreshToken");
+        }
+
+        if (lean) {
+            query.lean();
         }
 
         return query;
@@ -38,6 +51,7 @@ class AuthRepository {
         const {
             includePassword = false,
             includeRefreshToken = false,
+            lean = false,
         } = options;
 
         const query = User.findById(userId);
@@ -48,6 +62,18 @@ class AuthRepository {
 
         if (includeRefreshToken) {
             query.select("+refreshToken");
+        }
+
+        if (!includePassword) {
+            query.select("-password");
+        }
+
+        if (!includeRefreshToken) {
+            query.select("-refreshToken");
+        }
+
+        if (lean) {
+            query.lean();
         }
 
         return query;

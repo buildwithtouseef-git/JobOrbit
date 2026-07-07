@@ -10,6 +10,7 @@ const forgotPasswordSchema = require('../validations/forgot-password.validation'
 const resetPasswordSchema = require('../validations/reset-password.validation');
 const changePasswordSchema = require('../validations/change-password.validation');
 const verifyEmailSchema = require('../validations/verify-email.validation');
+const resendVerificationSchema = require('../validations/resend-verification.validation');
 
 const router = express.Router();
 
@@ -19,9 +20,11 @@ router.post('/login', validate(loginSchema), authController.login);
 router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
 router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
 router.post('/verify-email', validate(verifyEmailSchema), authController.verifyEmail);
+router.post('/resend-verification', validate(resendVerificationSchema), authController.resendVerification);
 router.post('/refresh-token', authController.refreshToken);
 
 // Protected routes
+router.get('/me', authenticate, authController.getCurrentUser);
 router.post('/logout', authenticate, authController.logout);
 router.patch('/change-password', authenticate, validate(changePasswordSchema), authController.changePassword);
 
