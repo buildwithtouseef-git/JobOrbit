@@ -4,6 +4,6 @@ const { email } = require('../../../shared/validations/common.validation');
 
 const forgotPasswordSchema = z.object({
     email,
-});
+}).strict();
 
 module.exports = forgotPasswordSchema;

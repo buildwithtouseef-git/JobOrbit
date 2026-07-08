@@ -14,15 +14,13 @@ class EmailService {
         });
     }
 
-    async sendResetPasswordEmail({ to, fullName, resetToken }) {
-        const resetUrl = `${env.CLIENT_URL}/reset-password?token=${resetToken}`;
-
+    async sendResetPasswordEmail({ to, fullName, otp }) {
         const html = resetPasswordTemplate({
             fullName,
-            resetUrl,
+            otp,
         });
 
-        const text = `Hello ${fullName}, reset your password using this link: ${resetUrl}`;
+        const text = `Hello ${fullName}, reset your password using this OTP code: ${otp}`;
 
         return this.sendEmail({
             to,
@@ -32,15 +30,13 @@ class EmailService {
         });
     }
 
-    async sendVerifyEmail({ to, fullName, verificationToken }) {
-        const verificationUrl = `${env.CLIENT_URL}/verify-email?token=${verificationToken}`;
-
+    async sendVerifyEmail({ to, fullName, otp }) {
         const html = verifyEmailTemplate({
             fullName,
-            verificationUrl,
+            otp,
         });
 
-        const text = `Hello ${fullName}, verify your email using this link: ${verificationUrl}`;
+        const text = `Hello ${fullName}, verify your email using this OTP code: ${otp}`;
 
         return this.sendEmail({
             to,

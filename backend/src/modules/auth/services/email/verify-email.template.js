@@ -1,4 +1,4 @@
-const verifyEmailTemplate = ({ fullName, verificationUrl }) => {
+const verifyEmailTemplate = ({ fullName, otp }) => {
     return `
     <!DOCTYPE html>
     <html lang="en">
@@ -38,44 +38,33 @@ const verifyEmailTemplate = ({ fullName, verificationUrl }) => {
                     </p>
 
                     <p style="color:#555;line-height:1.7;">
-                      Click the button below to confirm your email.
+                      Use the following OTP code to confirm your email.
                     </p>
 
                     <div style="text-align:center;margin:40px 0;">
-
-                      <a
-                        href="${verificationUrl}"
+                      <div
                         style="
-                          background:#2563eb;
-                          color:#ffffff;
-                          text-decoration:none;
-                          padding:15px 30px;
-                          border-radius:6px;
+                          background:#f0f4ff;
+                          color:#2563eb;
+                          padding:20px 40px;
+                          border-radius:12px;
                           display:inline-block;
+                          font-size:32px;
                           font-weight:bold;
+                          letter-spacing:8px;
+                          border: 2px dashed #2563eb;
                         "
                       >
-                        Verify Email
-                      </a>
-
+                        ${otp}
+                      </div>
                     </div>
 
                     <p style="color:#555;">
-                      This link will expire soon for your security.
+                      This code will expire in 15 minutes for your security.
                     </p>
 
                     <p style="color:#555;">
                       If you did not create a JobOrbit account, you can safely ignore this email.
-                    </p>
-
-                    <hr style="margin:40px 0;">
-
-                    <p style="font-size:13px;color:#999;">
-                      If the button doesn't work, copy and paste this link into your browser:
-                    </p>
-
-                    <p style="word-break:break-all;">
-                      ${verificationUrl}
                     </p>
 
                   </td>

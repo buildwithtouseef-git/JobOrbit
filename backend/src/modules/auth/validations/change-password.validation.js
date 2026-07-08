@@ -13,7 +13,7 @@ const changePasswordSchema = z
         confirmPassword: z
             .string()
             .min(1, 'Confirm password is required.'),
-    })
+    }).strict()
     .refine((data) => data.newPassword === data.confirmPassword, {
         message: 'Passwords do not match.',
         path: ['confirmPassword'],

@@ -1,5 +1,5 @@
 const User = require("../models/user.model");
-const PasswordResetToken = require("../models/passwordResetToken.model");
+const Otp = require("../models/otp.model");
 const LoginAttempt = require("../models/loginAttempt.model");
 
 const LOGIN_ATTEMPT_STATUS = require("../../../shared/constants/loginAttemptStatus");
@@ -15,6 +15,7 @@ class AuthRepository {
         const {
             includePassword = false,
             includeRefreshToken = false,
+            lean = false,
         } = options;
 
         const query = User.findOne({ email });
@@ -25,6 +26,18 @@ class AuthRepository {
 
         if (includeRefreshToken) {
             query.select("+refreshToken");
+        }
+
+        if (!includePassword) {
+            query.select("-password");
+        }
+
+        if (!includeRefreshToken) {
+            query.select("-refreshToken");
+        }
+
+        if (lean) {
+            query.lean();
         }
 
         return query;
@@ -38,6 +51,7 @@ class AuthRepository {
         const {
             includePassword = false,
             includeRefreshToken = false,
+            lean = false,
         } = options;
 
         const query = User.findById(userId);
@@ -48,6 +62,18 @@ class AuthRepository {
 
         if (includeRefreshToken) {
             query.select("+refreshToken");
+        }
+
+        if (!includePassword) {
+            query.select("-password");
+        }
+
+        if (!includeRefreshToken) {
+            query.select("-refreshToken");
+        }
+
+        if (lean) {
+            query.lean();
         }
 
         return query;
@@ -108,35 +134,28 @@ class AuthRepository {
         );
     }
 
-    // Password Reset Tokens
-    async createPasswordResetToken(tokenData) {
-        return PasswordResetToken.create(tokenData);
+    // OTPs
+    async createOtp(otpData) {
+        return Otp.create(otpData);
     }
 
-    async findPasswordResetToken(tokenHash) {
-        return PasswordResetToken.findOne({
-            tokenHash,
-            usedAt: null,
+    async findOtp(email, otp, type) {
+        return Otp.findOne({
+            email,
+            otp,
+            type,
             expiresAt: {
                 $gt: new Date(),
             },
         });
     }
 
-    async markPasswordResetTokenUsed(tokenId) {
-        return PasswordResetToken.findByIdAndUpdate(
-            tokenId,
-            {
-                usedAt: new Date(),
-            },
-            {
-                new: true,
-            }
-        );
+    async deleteOtpById(otpId) {
+        return Otp.findByIdAndDelete(otpId);
     }
 
-    async deletePasswordResetTokensByUserId(userId) {
-        return PasswordResetToken.deleteMany({ userId });
+    async deleteOtpsByEmailAndType(email, type) {
+        return Otp.deleteMany({ email, type });
     }
 
     // Login Attempts

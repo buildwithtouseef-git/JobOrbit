@@ -56,9 +56,28 @@ class JwtUtil {
             },
             env.JWT_ACCESS_SECRET,
             {
-                expiresIn: env.JWT_ACCESS_EXPIRES_IN,
+                expiresIn: env.EMAIL_VERIFICATION_TOKEN_EXPIRES || '1m',
             }
         );
+    }
+
+    // Generate Password Reset Step Token (after OTP verified)
+    generatePasswordResetStepToken(user) {
+        return jwt.sign(
+            {
+                userId: user._id.toString(),
+                type: 'password_reset_step',
+            },
+            env.JWT_ACCESS_SECRET,
+            {
+                expiresIn: '10m',
+            }
+        );
+    }
+
+    // Verify Password Reset Step Token
+    verifyPasswordResetStepToken(token) {
+        return jwt.verify(token, env.JWT_ACCESS_SECRET);
     }
 
     // Decode Token (Without Verification)

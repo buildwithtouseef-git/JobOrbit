@@ -62,10 +62,11 @@ const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 const resetPassword = asyncHandler(async (req, res) => {
-    const { token, newPassword } = req.validatedData;
+    const { email, resetToken, password } = req.validatedData;
     const result = await authService.resetPassword({
-        token,
-        newPassword,
+        email,
+        resetToken,
+        password,
     });
 
     return ApiResponse.success(
@@ -124,14 +125,56 @@ const logout = asyncHandler(async (req, res) => {
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
-    const { token } = req.validatedData;
-    const result = await authService.verifyEmail(token);
+    const { email, otp } = req.validatedData;
+    const result = await authService.verifyEmail({ email, otp });
 
     return ApiResponse.success(
         res,
         STATUS_CODES.ok,
         result.message,
         null
+    );
+});
+
+const resendVerification = asyncHandler(async (req, res) => {
+    const { email, type } = req.validatedData;
+    let result;
+    
+    if (type === 'password-reset') {
+        result = await authService.forgotPassword(email);
+    } else {
+        result = await authService.resendVerification(email);
+    }
+
+    return ApiResponse.success(
+        res,
+        STATUS_CODES.ok,
+        result.message,
+        null
+    );
+});
+
+const verifyResetOTP = asyncHandler(async (req, res) => {
+    const { email, otp } = req.validatedData;
+    
+    const result = await authService.verifyResetOTP({ email, otp });
+
+    return ApiResponse.success(
+        res,
+        STATUS_CODES.ok,
+        result.message,
+        { resetToken: result.resetToken }
+    );
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return ApiResponse.success(
+        res,
+        STATUS_CODES.ok,
+        'User profile retrieved successfully.',
+        {
+            user: req.user,
+        }
     );
 });
 
@@ -144,4 +187,7 @@ module.exports = {
     refreshToken,
     logout,
     verifyEmail,
+    resendVerification,
+    verifyResetOTP,
+    getCurrentUser,
 };

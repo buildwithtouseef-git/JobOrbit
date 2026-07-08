@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const authRepository = require('../repository/auth.repository');
 const passwordUtil = require('../../../shared/utils/password.util');
 const jwtUtil = require('../../../shared/utils/jwt.util');
@@ -79,13 +80,26 @@ class AuthService {
         };
     }
 
+    _generateOTP() {
+        return crypto.randomInt(100000, 999999).toString();
+    }
+
     async _sendVerificationEmail(user) {
-        const verificationToken = jwtUtil.generateEmailVerificationToken(user);
+        const otp = this._generateOTP();
+
+        await authRepository.deleteOtpsByEmailAndType(user.email, 'registration');
+
+        await authRepository.createOtp({
+            email: user.email,
+            otp,
+            type: 'registration',
+            expiresAt: new Date(Date.now() + 60 * 1000), // 60 seconds
+        });
 
         await emailService.sendVerifyEmail({
             to: user.email,
             fullName: user.fullName,
-            verificationToken,
+            otp,
         });
     }
 
@@ -127,6 +141,7 @@ class AuthService {
 
         try {
             await this._sendVerificationEmail(user);
+            logger.info(`Verification email sent to ${user.email}`);
         } catch (error) {
             logger.error(`Failed to send verification email to ${user.email}: ${error.message}`);
         }
@@ -222,22 +237,24 @@ class AuthService {
             };
         }
 
-        await authRepository.deletePasswordResetTokensByUserId(user._id);
+        const otp = this._generateOTP();
 
-        const { token, tokenHash } = tokenUtil.generatePasswordResetToken();
+        await authRepository.deleteOtpsByEmailAndType(user.email, 'password-reset');
 
-        await authRepository.createPasswordResetToken({
-            userId: user._id,
-            tokenHash,
-            expiresAt: this._getPasswordResetExpiryDate(),
+        await authRepository.createOtp({
+            email: user.email,
+            otp,
+            type: 'password-reset',
+            expiresAt: new Date(Date.now() + 60 * 1000), // 60 seconds
         });
 
         try {
             await emailService.sendResetPasswordEmail({
                 to: user.email,
                 fullName: user.fullName,
-                resetToken: token,
+                otp,
             });
+            logger.info(`Password reset email sent to ${user.email}`);
         } catch (error) {
             logger.error(`Failed to send reset password email to ${user.email}: ${error.message}`);
         }
@@ -247,19 +264,24 @@ class AuthService {
         };
     }
 
-    async resetPassword({ token, newPassword }) {
-        const tokenHash = tokenUtil.hashToken(token);
-
-        const resetTokenRecord = await authRepository.findPasswordResetToken(tokenHash);
-
-        if (!resetTokenRecord) {
+    async verifyResetOTP({ email, otp }) {
+        if (!email || !otp) {
             throw new ApiError(
                 STATUS_CODES.BAD_REQUEST,
-                RESPONSE_MESSAGES.AUTH.INVALID_OR_EXPIRED_TOKEN
+                'Email and OTP are required.'
             );
         }
 
-        const user = await authRepository.findUserById(resetTokenRecord.userId);
+        const otpRecord = await authRepository.findOtp(email, otp, 'password-reset');
+
+        if (!otpRecord) {
+            throw new ApiError(
+                STATUS_CODES.BAD_REQUEST,
+                'Invalid or expired OTP.'
+            );
+        }
+
+        const user = await authRepository.findUserByEmail(email);
 
         if (!user) {
             throw new ApiError(
@@ -268,11 +290,48 @@ class AuthService {
             );
         }
 
-        const hashedPassword = await passwordUtil.hashPassword(newPassword);
+        await authRepository.deleteOtpById(otpRecord._id);
+
+        // Generate a short-lived token for the final reset step (10 min)
+        const resetToken = jwtUtil.generatePasswordResetStepToken(user);
+
+        return {
+            resetToken,
+            message: 'OTP verified successfully.',
+        };
+    }
+
+    async resetPassword({ email, resetToken, password }) {
+        if (!email || !resetToken || !password) {
+            throw new ApiError(
+                STATUS_CODES.BAD_REQUEST,
+                'Email, resetToken, and new password are required.'
+            );
+        }
+
+        let decoded;
+
+        try {
+            decoded = jwtUtil.verifyPasswordResetStepToken(resetToken);
+        } catch (error) {
+            throw new ApiError(
+                STATUS_CODES.BAD_REQUEST,
+                'Invalid or expired reset token.'
+            );
+        }
+
+        const user = await authRepository.findUserByEmail(email);
+
+        if (!user || user._id.toString() !== decoded.userId) {
+            throw new ApiError(
+                STATUS_CODES.NOT_FOUND,
+                RESPONSE_MESSAGES.AUTH.USER_NOT_FOUND
+            );
+        }
+
+        const hashedPassword = await passwordUtil.hashPassword(password);
 
         await authRepository.updatePassword(user._id, hashedPassword);
-        await authRepository.markPasswordResetTokenUsed(resetTokenRecord._id);
-        await authRepository.deletePasswordResetTokensByUserId(user._id);
         await authRepository.clearRefreshToken(user._id);
 
         return {
@@ -372,35 +431,24 @@ class AuthService {
         };
     }
 
-    async verifyEmail(token) {
-        if (!token) {
+    async verifyEmail({ email, otp }) {
+        if (!email || !otp) {
             throw new ApiError(
                 STATUS_CODES.BAD_REQUEST,
-                RESPONSE_MESSAGES.AUTH.INVALID_TOKEN
+                'Email and OTP are required.'
             );
         }
 
-        let decoded;
+        const otpRecord = await authRepository.findOtp(email, otp, 'registration');
 
-        try {
-            decoded = jwtUtil.verifyEmailVerificationToken(token);
-        } catch (error) {
+        if (!otpRecord) {
             throw new ApiError(
                 STATUS_CODES.BAD_REQUEST,
-                error.name === 'TokenExpiredError'
-                    ? RESPONSE_MESSAGES.AUTH.TOKEN_EXPIRED
-                    : RESPONSE_MESSAGES.AUTH.INVALID_TOKEN
+                'Invalid or expired OTP.'
             );
         }
 
-        if (decoded.type !== TOKEN_TYPES.EMAIL_VERIFICATION) {
-            throw new ApiError(
-                STATUS_CODES.BAD_REQUEST,
-                RESPONSE_MESSAGES.AUTH.INVALID_TOKEN
-            );
-        }
-
-        const user = await authRepository.findUserById(decoded.userId);
+        const user = await authRepository.findUserByEmail(email);
 
         if (!user) {
             throw new ApiError(
@@ -419,8 +467,37 @@ class AuthService {
             isEmailVerified: true,
         });
 
+        await authRepository.deleteOtpById(otpRecord._id);
+
         return {
             message: RESPONSE_MESSAGES.AUTH.EMAIL_VERIFIED,
+        };
+    }
+
+    async resendVerification(email) {
+        const user = await authRepository.findUserByEmail(email);
+
+        if (!user) {
+            return {
+                message: RESPONSE_MESSAGES.AUTH.PASSWORD_RESET_EMAIL_SENT,
+            };
+        }
+
+        if (user.isEmailVerified) {
+            return {
+                message: RESPONSE_MESSAGES.AUTH.EMAIL_ALREADY_VERIFIED,
+            };
+        }
+
+        try {
+            await this._sendVerificationEmail(user);
+            logger.info(`Verification email resent to ${user.email}`);
+        } catch (error) {
+            logger.error(`Failed to resend verification email to ${user.email}: ${error.message}`);
+        }
+
+        return {
+            message: RESPONSE_MESSAGES.AUTH.PASSWORD_RESET_EMAIL_SENT,
         };
     }
 }

@@ -8,6 +8,7 @@ const validate = (schema) => {
         try {
             const validatedData = schema.parse(req.body);
             req.validatedData = validatedData;
+            req.body = validatedData;
             next();
         }
         catch (error) {

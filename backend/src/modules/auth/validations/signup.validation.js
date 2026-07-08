@@ -7,18 +7,11 @@ const {
     password
 } = require('../../../shared/validations/common.validation');
 
-const signupSchema = z
-    .object({
-        fullName,
-        email,
-        username,
-        password,
+const signupSchema = z.object({
+    fullName,
+    email,
+    username,
+    password,
+}).strict();
 
-        confirmPassword: z.string(),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-        message: 'Passwords do not match.',
-        path: ['confirmPassword'],
-    });
-
-    module.exports = signupSchema;
+module.exports = signupSchema;
