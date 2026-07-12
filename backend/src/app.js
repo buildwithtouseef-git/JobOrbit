@@ -7,6 +7,7 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const { authLimiter, generalLimiter } = require('./shared/middleware/security.middleware');
 
+
 const app = express();
 
 app.disable('x-powered-by');
@@ -57,8 +58,10 @@ app.get('/', (req, res) => {
 
 /* ---------- Routes ---------- */
 const authRoutes = require('./modules/auth/routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/users', userRoutes); // Module 2: User Profile (/me = private, /:username = public)
 
 /* ------- 404 Middleware -------- */
 app.use((req, res) => {
