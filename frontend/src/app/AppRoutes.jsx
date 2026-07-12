@@ -8,8 +8,6 @@ import Register from '../features/auth/components/Register'
 import OTPVerification from '../features/auth/components/OTPVerification'
 import ForgotPassword from '../features/auth/components/ForgotPassword'
 import ResetPassword from '../features/auth/components/ResetPassword'
-import ProfilePage from '../features/profile/components/ProfilePage'
-import Settings from '../features/profile/components/Settings'
 
 export default function AppRoutes() {
   return (
@@ -49,24 +47,6 @@ export default function AppRoutes() {
         }
       />
       <Route path="/reset-password" element={<ResetPassword />} />
-
-      {/* Protected Routes */}
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        }
-      />
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
